@@ -1,21 +1,7 @@
-import re
+# mermaid_class_generator.py
 from core.diagram_model import ClassDiagram
-from core.diagram_generator import DiagramGenerator
-
-def escape_label(label: str) -> str:
-    """
-    Экранирует специальные символы для Mermaid:
-      - &  -> &amp;
-      - ;  -> &#59;
-      - последовательности "\n" и реальные переводы строк -> <br>
-      - (  -> &#40;
-      - )  -> &#41;
-    """
-    safe = label.replace("&", "&amp;")
-    safe = safe.replace(";", "#59;")
-    safe = safe.replace("\\n", "<br>").replace("\n", "<br>")
-    safe = safe.replace("(", "#40;").replace(")", "#41;")
-    return safe
+from core.base_mermaid_generator import BaseMermaidGenerator
+import re
 
 def process_body_line(line: str) -> str:
     """
@@ -28,22 +14,21 @@ def process_body_line(line: str) -> str:
     processed = re.sub(r"\)\s*:", ")", processed)
     return processed
 
-class MermaidClassGenerator(DiagramGenerator):
+class MermaidClassGenerator(BaseMermaidGenerator):
     def generate(self, diagram: ClassDiagram) -> str:
         lines = ["classDiagram"]
         # Обрабатываем отношения между классами
         for rel in diagram.relationships:
             relation_type = rel.relation.lower().strip()
-            safe_label = escape_label(rel.label.strip()) if rel.label and rel.label.strip() else ""
+            safe_label = (self.escape_text(rel.label.strip())
+                          if rel.label and rel.label.strip() else "")
             # Если заданы карточные метки – выводим строку с ними
             if rel.source_cardinality or rel.target_cardinality:
-                # Если safe_label не пустой, добавляем его после двоеточия
                 if safe_label:
                     lines.append(f'{rel.source} "{rel.source_cardinality}" {rel.arrow} "{rel.target_cardinality}" {rel.target} : {safe_label}')
                 else:
                     lines.append(f'{rel.source} "{rel.source_cardinality}" {rel.arrow} "{rel.target_cardinality}" {rel.target}')
             else:
-                # Если карточные метки не заданы, обрабатываем по типу отношений
                 if relation_type == "extends":
                     lines.append(f"{rel.target} <|-- {rel.source}")
                 elif relation_type == "implements":

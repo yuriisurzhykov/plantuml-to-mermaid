@@ -1,19 +1,18 @@
 # mermaid_generator.py
 from core.diagram_model import ComponentDiagram
-from core.diagram_generator import DiagramGenerator
+from core.base_mermaid_generator import BaseMermaidGenerator
 
-class MermaidGenerator(DiagramGenerator):
+class MermaidGenerator(BaseMermaidGenerator):
     def generate(self, diagram: ComponentDiagram) -> str:
         lines = ["flowchart LR"]
-        # Определения компонентов: заменяем последовательности "\n" и реальные переводы строк на <br>
+        # Определения компонентов: экранируем метку через BaseMermaidGenerator.escape_text
         for comp in diagram.components:
-            safe_label = comp.label.replace("\\n", "<br>").replace("\n", "<br>")
+            safe_label = self.escape_text(comp.label)
             lines.append(f'{comp.id}["{safe_label}"]')
-        # Определения связей: экранируем скобки в метках
+        # Определения связей: экранируем метки через BaseMermaidGenerator.escape_text
         for edge in diagram.edges:
             if edge.label:
-                safe_edge_label = edge.label.replace("\\n", "<br>").replace("\n", "<br>")
-                safe_edge_label = safe_edge_label.replace("(", "#40;").replace(")", "#41;")
+                safe_edge_label = self.escape_text(edge.label)
                 lines.append(f'{edge.source} -->|{safe_edge_label}| {edge.target}')
             else:
                 lines.append(f'{edge.source} --> {edge.target}')
