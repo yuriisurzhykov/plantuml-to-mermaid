@@ -1,9 +1,9 @@
 import streamlit as st
 from mermaid_viewer import render_mermaid
-from plantuml_parser import PlantUMLComponentParser
-from mermaid_generator import MermaidGenerator
-from plantuml_class_parser import PlantUMLClassParser
-from mermaid_class_generator import MermaidClassGenerator
+from components.plantuml_components_parser import PlantUMLComponentParser
+from components.mermaid_components_generator import MermaidGenerator
+from classes.plantuml_class_parser import PlantUMLClassParser
+from classes.mermaid_class_generator import MermaidClassGenerator
 
 def main():
     st.set_page_config(page_title="PlantUML to Mermaid Converter", layout="wide")
