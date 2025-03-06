@@ -12,7 +12,7 @@ def render_mermaid(mermaid_code: str, height: int = 500):
         <!-- Подключаем Mermaid из CDN -->
         <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
         <script>
-          mermaid.initialize({{startOnLoad: true}});
+          mermaid.initialize({{startOnLoad:true, securityLevel:'loose'}});
         </script>
         <style>
           body {{

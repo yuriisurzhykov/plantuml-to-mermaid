@@ -1,10 +1,11 @@
 # plantuml_parser.py
 import re
 from diagram_model import Component, Edge, ComponentDiagram
+from diagram_parser import DiagramParser
 
-class PlantUMLComponentParser:
+class PlantUMLComponentParser(DiagramParser):
     def parse(self, plantuml: str) -> ComponentDiagram:
-        # Удаляем директивы @startuml и @enduml, а также пустые строки
+        # Удаляем директивы @startuml/@enduml и пустые строки
         lines = [
             line.strip()
             for line in plantuml.splitlines()
@@ -17,7 +18,7 @@ class PlantUMLComponentParser:
         # Шаблоны для парсинга
         comp_quoted_pattern = re.compile(r'^component\s+"([^"]+)"\s+as\s+(\w+)', re.IGNORECASE)
         comp_simple_pattern = re.compile(r'^component\s+(\w+)', re.IGNORECASE)
-        # Расширенный шаблон для стрелок: поддерживает как -->, так и <--
+        # Поддержка стрелок --> и <--
         edge_pattern = re.compile(r'^(\w+)\s+((?:-->|<--))\s+(\w+)(?:\s*:\s*(.+))?$', re.IGNORECASE)
         
         for line in lines:
@@ -43,7 +44,7 @@ class PlantUMLComponentParser:
                 # Если стрелка начинается с "<", меняем направление
                 if arrow.startswith("<"):
                     source, target = target, source
-                # Если компонент не объявлен явно, добавляем его с именем по умолчанию
+                # Если компонент не объявлен, добавляем его с именем по умолчанию
                 if source not in components:
                     components[source] = Component(id=source, label=source)
                 if target not in components:
@@ -51,6 +52,5 @@ class PlantUMLComponentParser:
                 edges.append(Edge(source=source, target=target, label=label.strip() if label else None))
                 continue
             
-            # Остальные строки (например, комментарии) можно игнорировать или логировать
-        
+            # Остальные строки игнорируем
         return ComponentDiagram(components=list(components.values()), edges=edges)
