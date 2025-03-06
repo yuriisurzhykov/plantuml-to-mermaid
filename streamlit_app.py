@@ -1,5 +1,4 @@
 import streamlit as st
-from viewer.mermaid_viewer import render_mermaid
 from components.plantuml_components_parser import PlantUMLComponentParser
 from components.mermaid_components_generator import MermaidGenerator
 from classes.plantuml_class_parser import PlantUMLClassParser
@@ -7,39 +6,45 @@ from classes.mermaid_class_generator import MermaidClassGenerator
 from sequence.plantuml_sequence_parser import PlantUMLSequenceParser
 from sequence.mermaid_sequence_generator import MermaidSequenceGenerator
 from resources.image import get_base64_image
-
+from viewer.plantuml_viewer import PlantUMLRenderer
+from viewer.mermaid_viewer import MermaidRenderer
 
 def main():
     st.set_page_config(page_title="PlantUML to Mermaid Converter", layout="wide")
     
-    # Загружаем логотип из ресурсов и отображаем его через Base64
+    # Display logo
     try:
         logo_b64 = get_base64_image("resources/project_logo.png")
-        html_logo = f'<div style="text-align: center;"><img src="data:image/png;base64,{logo_b64}" alt="Logo" width="350"></div>'
+        html_logo = (
+            f'<div style="text-align: center;">'
+            f'<img src="data:image/png;base64,{logo_b64}" alt="Logo" width="350">'
+            f'</div>'
+        )
         st.markdown(html_logo, unsafe_allow_html=True)
     except Exception as e:
-        st.error("Ошибка при загрузке логотипа: " + str(e))
+        st.error("Error loading logo: " + str(e))
     
     st.title("PlantUML to Mermaid Converter")
-    st.markdown("Переведите ваш PlantUML код в удобочитаемый Mermaid синтаксис.")
+    st.markdown("Convert your PlantUML code to a readable Mermaid syntax.")
 
-    # Сайдбар с настройками и инструкциями
-    st.sidebar.header("Настройки диаграммы")
+    # Sidebar settings and instructions
+    st.sidebar.header("Diagram Settings")
     diagram_type = st.sidebar.selectbox(
-        "Выберите тип диаграммы",
+        "Select diagram type",
         ["🧩 Components", "📚 Class", "🔄 Sequence"],
         index=0
     )
     st.sidebar.markdown(
         """
-        **Инструкция:**
-        1. Вставьте ваш PlantUML код в текстовое поле.
-        2. Нажмите кнопку **Convert to Mermaid**.
-        3. Слева будет показан сгенерированный Mermaid код, справа – предварительный просмотр диаграммы.
+        **Instructions:**
+        1. Paste your PlantUML code in the text area.
+        2. Click **Convert to Mermaid**.
+        3. The top row shows the PlantUML code and its preview, while the bottom row displays
+           the generated Mermaid code and its preview.
         """
     )
-
-    # Placeholder-текст зависит от выбранного типа диаграммы
+    
+    # Define placeholder text based on the selected diagram type
     if "Components" in diagram_type:
         placeholder_text = (
             '@startuml\n'
@@ -105,38 +110,65 @@ def main():
         )
     else:
         placeholder_text = ""
-
-    st.subheader("Введите ваш PlantUML код")
-    plantuml_code = st.text_area("PlantUML Code", height=400, placeholder=placeholder_text)
-
-    convert_button = st.button("Convert to Mermaid")
-
-    if convert_button and plantuml_code.strip():
-        if "Components" in diagram_type:
-            parser = PlantUMLComponentParser()
-            diagram = parser.parse(plantuml_code)
-            generator = MermaidGenerator()
-            mermaid_code = generator.generate(diagram)
-        elif "Class" in diagram_type:
-            parser = PlantUMLClassParser()
-            diagram = parser.parse(plantuml_code)
-            generator = MermaidClassGenerator()
-            mermaid_code = generator.generate(diagram)
-        elif "Sequence" in diagram_type:
-            parser = PlantUMLSequenceParser()
-            diagram = parser.parse(plantuml_code)
-            generator = MermaidSequenceGenerator()
-            mermaid_code = generator.generate(diagram)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### Generated Mermaid Code")
-            st.code(mermaid_code, language="mermaid")
-        with col2:
-            st.markdown("### Diagram Preview")
-            render_mermaid(mermaid_code, height=500)
-    else:
-        st.info("Введите ваш PlantUML код и нажмите **Convert to Mermaid**.")
+    
+    # ------------------------------------------------------------------
+    # Top Row: PlantUML Input and Preview
+    # ------------------------------------------------------------------
+    with st.container():
+        top_cols = st.columns(2)
+        with top_cols[0]:
+            st.subheader("PlantUML Code")
+            plantuml_code = st.text_area(
+                "Enter your PlantUML code", 
+                height=400, 
+                placeholder=placeholder_text
+            )
+            convert_button = st.button("Convert to Mermaid")
+        with top_cols[1]:
+            st.subheader("PlantUML Diagram Preview")
+            plantuml_renderer = PlantUMLRenderer()
+            if plantuml_code.strip():
+                plantuml_renderer.render(plantuml_code, 400)
+            else:
+                st.info("Enter your PlantUML code to preview the diagram.")
+    
+    # ------------------------------------------------------------------
+    # Bottom Row: Mermaid Code and Preview
+    # ------------------------------------------------------------------
+    with st.container():
+        bottom_cols = st.columns(2)
+        if convert_button and plantuml_code.strip():
+            # Choose the appropriate parser and generator based on diagram type
+            if "Components" in diagram_type:
+                parser = PlantUMLComponentParser()
+                diagram = parser.parse(plantuml_code)
+                generator = MermaidGenerator()
+                mermaid_code = generator.generate(diagram)
+            elif "Class" in diagram_type:
+                parser = PlantUMLClassParser()
+                diagram = parser.parse(plantuml_code)
+                generator = MermaidClassGenerator()
+                mermaid_code = generator.generate(diagram)
+            elif "Sequence" in diagram_type:
+                parser = PlantUMLSequenceParser()
+                diagram = parser.parse(plantuml_code)
+                generator = MermaidSequenceGenerator()
+                mermaid_code = generator.generate(diagram)
+            else:
+                mermaid_code = ""
+            
+            with bottom_cols[0]:
+                st.subheader("Generated Mermaid Code")
+                st.code(mermaid_code, language="mermaid")
+            with bottom_cols[1]:
+                st.subheader("Mermaid Diagram Preview")
+                mermaid_renderer = MermaidRenderer()
+                mermaid_renderer.render(mermaid_code, 500)
+        else:
+            with bottom_cols[0]:
+                st.info("Click **Convert to Mermaid** to convert your PlantUML code.")
+            with bottom_cols[1]:
+                st.info("Mermaid diagram preview will appear after conversion.")
 
 if __name__ == "__main__":
     main()
