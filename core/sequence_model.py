@@ -18,7 +18,7 @@ class Message:
 @dataclass
 class Activate:
     participant: str
-
+ 
 @dataclass
 class Deactivate:
     participant: str

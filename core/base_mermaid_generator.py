@@ -1,8 +1,6 @@
-# core/base_mermaid_generator.py
-
 class BaseMermaidGenerator:
     @staticmethod
-    def escape_text(text: str) -> str:
+    def escape_text(text: str, support_lucid: bool = False) -> str:
         """
         Экранирует специальные символы для Mermaid:
           - &  -> &amp;
@@ -11,6 +9,8 @@ class BaseMermaidGenerator:
           - (  -> #40;
           - )  -> #41;
         """
+        if support_lucid:
+            return text
         safe = text.replace("&", "&amp;")
         safe = safe.replace(";", "#59;")
         safe = safe.replace("\\n", "<br>").replace("\n", "<br>")
