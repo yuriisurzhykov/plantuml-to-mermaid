@@ -1,6 +1,6 @@
 # mermaid_generator.py
-from diagram_model import ComponentDiagram
-from diagram_generator import DiagramGenerator
+from core.diagram_model import ComponentDiagram
+from core.diagram_generator import DiagramGenerator
 
 class MermaidGenerator(DiagramGenerator):
     def generate(self, diagram: ComponentDiagram) -> str:

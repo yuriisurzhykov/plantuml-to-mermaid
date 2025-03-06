@@ -1,6 +1,6 @@
 import re
-from diagram_model import ClassDiagram
-from diagram_generator import DiagramGenerator
+from core.diagram_model import ClassDiagram
+from core.diagram_generator import DiagramGenerator
 
 def escape_label(label: str) -> str:
     """

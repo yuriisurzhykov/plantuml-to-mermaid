@@ -1,5 +1,5 @@
 import streamlit as st
-from mermaid_viewer import render_mermaid
+from viewer.mermaid_viewer import render_mermaid
 from components.plantuml_components_parser import PlantUMLComponentParser
 from components.mermaid_components_generator import MermaidGenerator
 from classes.plantuml_class_parser import PlantUMLClassParser

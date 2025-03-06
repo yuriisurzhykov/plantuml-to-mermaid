@@ -1,7 +1,7 @@
 # plantuml_parser.py
 import re
-from diagram_model import Component, Edge, ComponentDiagram
-from diagram_parser import DiagramParser
+from core.diagram_model import Component, Edge, ComponentDiagram
+from core.diagram_parser import DiagramParser
 
 class PlantUMLComponentParser(DiagramParser):
     def parse(self, plantuml: str) -> ComponentDiagram:

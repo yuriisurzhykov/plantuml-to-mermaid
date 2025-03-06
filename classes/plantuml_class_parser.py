@@ -1,6 +1,6 @@
 import re
-from diagram_model import ClassDiagram, ClassEntity, ClassRelationship
-from diagram_parser import DiagramParser
+from core.diagram_model import ClassDiagram, ClassEntity, ClassRelationship
+from core.diagram_parser import DiagramParser
 
 class PlantUMLClassParser(DiagramParser):
     def parse(self, plantuml: str) -> ClassDiagram:
