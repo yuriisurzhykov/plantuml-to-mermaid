@@ -1,75 +1,45 @@
 import streamlit as st
-import re
-
-def plantuml_to_mermaid(plantuml_code: str) -> str:
-    """
-    Наивный конвертер из PlantUML кода (только sequence-диаграммы)
-    в упрощённый Mermaid.
-    """
-    # 1. Удаляем служебные теги PlantUML
-    lines = plantuml_code.splitlines()
-    filtered_lines = []
-    for line in lines:
-        line = line.strip()
-        if line.startswith('@startuml'):
-            continue
-        if line.startswith('@enduml'):
-            continue
-        if not line:
-            continue
-        filtered_lines.append(line)
-    
-    # 2. Подготавливаем результат под Mermaid sequenceDiagram
-    mermaid_lines = ["sequenceDiagram"]
-
-    # 3. Наивно обрабатываем стрелки
-    # Пример PlantUML: Alice -> Bob : Hello
-    # Переведём в Mermaid: Alice->>Bob: Hello
-    # Также учтём вариант ->> (с «двойной стрелкой»)
-    arrow_pattern = re.compile(r'^(\S+)\s*([-\>]+)\s*(\S+)\s*:\s*(.*)$')
-
-    for line in filtered_lines:
-        match = arrow_pattern.match(line)
-        if match:
-            source, arrow, target, message = match.groups()
-            # PlantUML может иметь -> или ->>
-            # Mermaid чаще использует ->> в sequenceDiagram
-            # Сведём к единому варианту ->> :
-            mermaid_arrow = "->>" if ">>" in arrow else "->>"
-            converted_line = f"{source}{mermaid_arrow}{target}: {message}"
-            mermaid_lines.append(converted_line)
-        else:
-            # Здесь можно добавить дополнительный парсинг, 
-            # например, для 'participant' или заметок (note)
-            # Пока просто добавим строку "как есть"
-            mermaid_lines.append(f"%% {line}")  # закомментируем, чтобы не ломать синтаксис
-    
-    # Объединяем результат
-    mermaid_result = "\n".join(mermaid_lines)
-    return mermaid_result
+from plantuml_parser import PlantUMLComponentParser
+from mermaid_generator import MermaidGenerator
+from mermaid_viewer import render_mermaid
 
 def main():
-    st.title("Конвертер PlantUML → Mermaid (sequenceDiagram)")
-
-    st.write(
-        "Данное демо-приложение наивно конвертирует sequence-диаграммы из PlantUML "
-        "в упрощённый Mermaid-код. Учтите, что поддерживаются только очень базовые конструкции."
-    )
+    st.set_page_config(page_title="PlantUML to Mermaid Converter", layout="wide")
+    st.title("PlantUML to Mermaid Converter (Components Diagram)")
 
     plantuml_code = st.text_area(
-        "Вставьте ваш PlantUML-код (sequence-диаграмма)", 
-        height=200,
-        value="""@startuml
-Alice -> Bob : Hello
-Bob -> Alice : Hi
-@enduml"""
+        "Paste your PlantUML code here:",
+        height=400,
+        placeholder=(
+            '@startuml\n'
+            'component "UI (Compose Screen)" as UI\n'
+            'component "ViewModel\\n(State Holder)" as VM\n'
+            'component "Domain/Repository\\n(Business Logic)" as BL\n\n'
+            'UI --> VM : User events (intent calls)\n'
+            'VM --> BL : Requests data or actions\n'
+            'VM <-- BL : New data/result\n'
+            'UI <-- VM : Updated UI State\n'
+            '@enduml'
+        )
     )
+    convert_button = st.button("Convert to Mermaid")
 
-    if st.button("Конвертировать"):
-        mermaid_code = plantuml_to_mermaid(plantuml_code)
-        st.subheader("Результирующий Mermaid-код")
-        st.code(mermaid_code, language="markdown")  # указываем markdown, чтобы не ломать Mermaid синтаксис
-        st.write("Скопируйте этот результат и проверьте в онлайн-редакторе Mermaid или в других поддерживающих инструментах.")
+    if convert_button and plantuml_code.strip():
+        # Парсим PlantUML в промежуточное представление диаграммы
+        parser = PlantUMLComponentParser()
+        diagram = parser.parse(plantuml_code)
+
+        # Генерируем Mermaid-код из промежуточной структуры
+        generator = MermaidGenerator()
+        mermaid_code = generator.generate(diagram)
+
+        st.markdown("### Generated Mermaid Code")
+        st.code(mermaid_code, language="mermaid")
+
+        st.markdown("### Diagram Preview")
+        render_mermaid(mermaid_code, height=500)
+    else:
+        st.write("Converted Mermaid code and diagram preview will appear here after clicking **Convert**.")
 
 if __name__ == "__main__":
     main()
