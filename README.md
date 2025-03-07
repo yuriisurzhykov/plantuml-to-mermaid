@@ -1,6 +1,9 @@
 <!-- Improved compatibility of back to top link -->
 <a id="readme-top"></a>
 
+[![Pylint Lint Checker](https://github.com/yuriisurzhykov/plantuml-to-mermaid/actions/workflows/pylint.yml/badge.svg)](https://github.com/yuriisurzhykov/plantuml-to-mermaid/actions/workflows/pylint.yml/)
+[![Package Assemble](https://github.com/yuriisurzhykov/plantuml-to-mermaid/actions/workflows/python-package.yml/badge.svg)](https://github.com/yuriisurzhykov/plantuml-to-mermaid/actions/workflows/python-package.yml/)
+
 <!-- PROJECT SHIELDS -->
 [![Contributors](https://img.shields.io/github/contributors/yuriisurzhykov/plantuml-to-mermaid?style=for-the-badge)](https://github.com/yuriisurzhykov/plantuml-to-mermaid/graphs/contributors)
 [![Forks](https://img.shields.io/github/forks/yuriisurzhykov/plantuml-to-mermaid?style=for-the-badge)](https://github.com/yuriisurzhykov/plantuml-to-mermaid/network/members)
